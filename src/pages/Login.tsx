@@ -42,87 +42,113 @@ export default function Login({ onBack }: { onBack?: () => void }) {
   }
 
   return (
-    <main className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-4">
-      <div className="w-full max-w-sm">
-        <p className="mb-4 text-center text-2xl font-bold">ToolLedger</p>
-        <div className="card bg-base-100 shadow-xl">
-          <form className="card-body" onSubmit={handleSubmit} noValidate>
-            <h1 className="card-title">Log in</h1>
+    <main className="login-stage flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-4 sm:p-6">
+      <div className="w-full max-w-xl">
+        <div className="login-stack">
+          <div aria-hidden="true" className="login-layer login-layer-2" />
+          <div aria-hidden="true" className="login-layer login-layer-1" />
+          <section className="login-panel">
+            <p className="login-brand font-display text-center text-xl font-extrabold">
+              ToolLedger
+            </p>
+            <h1 className="login-heading font-display mt-6 text-center font-bold">
+              Welcome back
+            </h1>
+            <p className="login-sub mt-3 text-center">
+              Log in to keep track of your workshop&apos;s tool loans.
+            </p>
 
-            {notice && (
-              <p role="status" className="text-sm">
-                {notice}
-              </p>
-            )}
-
-            <div className="form-control">
-              <label className="label" htmlFor="login-email">
-                <span className="label-text">Email</span>
-              </label>
-              <input
-                id="login-email"
-                type="email"
-                autoComplete="email"
-                className="input input-bordered w-full"
-                value={email}
-                onChange={(event) => {
-                  setEmail(event.target.value)
-                  setEmailError(null)
-                }}
-                aria-invalid={emailError !== null}
-                aria-describedby={emailError ? 'login-email-error' : undefined}
-              />
-              {emailError && (
-                <p id="login-email-error" className="text-error mt-1 text-sm">
-                  {emailError}
+            <form
+              onSubmit={handleSubmit}
+              noValidate
+              className="mt-8 flex flex-col gap-5"
+            >
+              {notice && (
+                <p role="status" className="login-notice text-sm">
+                  {notice}
                 </p>
               )}
-            </div>
 
-            <div className="form-control">
-              <label className="label" htmlFor="login-password">
-                <span className="label-text">Password</span>
-              </label>
-              <input
-                id="login-password"
-                type="password"
-                autoComplete="current-password"
-                className="input input-bordered w-full"
-                value={password}
-                onChange={(event) => {
-                  setPassword(event.target.value)
-                  setPasswordError(null)
-                }}
-                aria-invalid={passwordError !== null}
-                aria-describedby={
-                  passwordError ? 'login-password-error' : undefined
-                }
-              />
-              {passwordError && (
-                <p id="login-password-error" className="text-error mt-1 text-sm">
-                  {passwordError}
-                </p>
-              )}
-            </div>
+              <div>
+                <label
+                  className="login-label mb-2 block text-sm font-semibold"
+                  htmlFor="login-email"
+                >
+                  Email
+                </label>
+                <input
+                  id="login-email"
+                  type="email"
+                  autoComplete="email"
+                  className="input login-input"
+                  value={email}
+                  onChange={(event) => {
+                    setEmail(event.target.value)
+                    setEmailError(null)
+                  }}
+                  aria-invalid={emailError !== null}
+                  aria-describedby={
+                    emailError ? 'login-email-error' : undefined
+                  }
+                />
+                {emailError && (
+                  <p id="login-email-error" className="login-error mt-2 text-sm">
+                    {emailError}
+                  </p>
+                )}
+              </div>
 
-            <button type="submit" className="btn btn-primary mt-2 w-full">
-              Log in
-            </button>
+              <div>
+                <label
+                  className="login-label mb-2 block text-sm font-semibold"
+                  htmlFor="login-password"
+                >
+                  Password
+                </label>
+                <input
+                  id="login-password"
+                  type="password"
+                  autoComplete="current-password"
+                  className="input login-input"
+                  value={password}
+                  onChange={(event) => {
+                    setPassword(event.target.value)
+                    setPasswordError(null)
+                  }}
+                  aria-invalid={passwordError !== null}
+                  aria-describedby={
+                    passwordError ? 'login-password-error' : undefined
+                  }
+                />
+                {passwordError && (
+                  <p
+                    id="login-password-error"
+                    className="login-error mt-2 text-sm"
+                  >
+                    {passwordError}
+                  </p>
+                )}
+              </div>
 
-            <div className="flex items-center justify-between text-sm">
-              <a className="link link-primary" href="#signup">
-                Sign Up
-              </a>
-              <a className="link link-primary" href="#forgot-password">
-                Forgot Password
-              </a>
-            </div>
-          </form>
+              <button type="submit" className="btn login-submit mt-2">
+                Log in
+              </button>
+
+              <div className="flex items-center justify-between text-sm">
+                <a className="link login-link" href="#signup">
+                  Sign Up
+                </a>
+                <a className="link login-link" href="#forgot-password">
+                  Forgot Password
+                </a>
+              </div>
+            </form>
+          </section>
         </div>
         {onBack && (
           <button
             type="button"
-            className="link link-primary mt-4 w-full text-center text-sm"
+            className="login-back mt-5 w-full text-center text-sm"
             onClick={onBack}
           >
             ← Back to home
