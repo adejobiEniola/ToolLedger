@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ToolLedger — P2P Tool Sharing & Lending Library</title>
+<meta name="description" content="Borrow tools from neighbors, lend your own, save money and waste. A peer-to-peer tool lending library." />
+<style>
+:root{
+  --bg:#f7f6f2; --card:#ffffff; --ink:#1a1e1c; --muted:#6b7470;
+  --line:#e7e2d7; --brand:#1a7a4c; --brand-2:#0f5a37; --accent:#ff8a2a;
+  --accent-soft:#fff1e3; --green-soft:#e6f4ec; --radius:16px;
+  --shadow:0 10px 30px rgba(26,30,28,.08); --shadow-sm:0 4px 14px rgba(26,30,28,.07);
+  --font: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);background:var(--bg);color:var(--ink);line-height:1.5}
+a{color:inherit}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(247,246,242,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.topbar-inner{max-width:1240px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.02em}
+.logo-mark{width:38px;height:38px;border-radius:11px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:20px}
+.logo small{display:block;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.nav{display:flex;gap:6px;margin-left:8px}
+.nav button{border:0;background:transparent;padding:9px 14px;border-radius:999px;font-weight:600;cursor:pointer;color:var(--muted)}
+.nav button.active,.nav button:hover{background:var(--ink);color:#fff}
+.search-wrap{margin-left:auto;display:flex;gap:10px;align-items:center;flex:1;max-width:520px;justify-content:flex-end}
+.search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 14px;flex:1;min-width:200px}
+.search input{border:0;outline:0;width:100%;font-size:14px;background:transparent}
+.btn{border:0;border-radius:999px;padding:11px 18px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.15s}
+.btn-primary{background:var(--brand);color:#fff}.btn-primary:hover{background:var(--brand-2)}
+.btn-dark{background:var(--ink);color:#fff}.btn-ghost{background:#fff;border:1px solid var(--line)}
+.btn-accent{background:var(--accent);color:#1a1e1c}
+.btn-sm{padding:8px 13px;font-size:13px}
+.user-chip{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 12px 5px 5px;cursor:pointer}
+.avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px}
+.container{max-width:1240px;margin:0 auto;padding:0 20px}
+.hero{margin:22px auto;display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
+.hero-main{background:var(--ink);color:#fff;border-radius:24px;padding:34px;position:relative;overflow:hidden}
+.hero-main h1{margin:0 0 10px;font-size:44px;line-height:.95;letter-spacing:-.04em}
+.hero-main p{color:#c8cfcb;max-width:46ch}
+.hero-stats{display:flex;gap:22px;margin:22px 0}
+.hero-stats strong{font-size:22px;display:block}.hero-stats span{font-size:12px;color:#a8b1ad;text-transform:uppercase;letter-spacing:.06em}
+.hero-cta{display:flex;gap:10px;flex-wrap:wrap}
+.hero-side{display:flex;flex-direction:column;gap:18px}
+.how-card,.impact-card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:var(--shadow-sm)}
+.how-card ol{margin:10px 0 0;padding-left:18px;color:#3a4140;font-size:14px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px}
+.pill-green{background:var(--green-soft);color:var(--brand-2)}
+.pill-orange{background:var(--accent-soft);color:#9a4a00}
+.pill-gray{background:#eef0ee;color:#4a5351}
+.toolbar{position:sticky;top:63px;z-index:40;background:var(--bg);padding:12px 0;border-bottom:1px solid var(--line)}
+.toolbar-inner{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 13px;font-size:13px;font-weight:600;cursor:pointer}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+select,input[type=date],input[type=text],input[type=number],textarea{font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;width:100%}
+select{width:auto}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:20px 0 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:.15s;cursor:pointer}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.card-img{height:160px;display:grid;place-items:center;font-size:64px;position:relative}
+.card-body{padding:14px 14px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card-title{font-weight:800;margin:0;font-size:16px;letter-spacing:-.01em}
+.card-meta{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.card-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between}
+.price{font-weight:800}.price small{font-weight:600;color:var(--muted)}
+.fav{position:absolute;top:10px;right:10px;background:#fff;border:1px solid var(--line);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;cursor:pointer}
+.avail-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.section-head{display:flex;align-items:end;justify-content:space-between;margin:28px 0 6px}
+.section-head h2{margin:0;font-size:26px;letter-spacing:-.03em}
+.section-head p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.hub{display:none;margin:20px 0 50px}
+.hub.active{display:block}
+.tabs{display:flex;gap:8px;margin:14px 0}
+.tabs button{border:1px solid var(--line);background:#fff;padding:9px 14px;border-radius:999px;font-weight:700;cursor:pointer}
+.tabs button.active{background:var(--ink);color:#fff}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px}
+.table{width:100%;border-collapse:collapse;font-size:14px}
+.table th{text-align:left;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding:10px;border-bottom:1px solid var(--line)}
+.table td{padding:12px 10px;border-bottom:1px solid #f0ede4;vertical-align:middle}
+.status{padding:5px 10px;border-radius:999px;font-size:12px;font-weight:800;display:inline-block}
+.s-pending{background:#fff4cc;color:#7a5d00}.s-approved{background:var(--green-soft);color:var(--brand-2)}
+.s-declined{background:#ffe3e3;color:#9b1c1c}.s-returned{background:#e9ecef;color:#495057}.s-active{background:#e0edff;color:#1d4ed8}
+.modal-back{position:fixed;inset:0;background:rgba(20,25,23,.55);display:none;place-items:center;z-index:100;padding:18px}
+.modal-back.open{display:grid}
+.modal{background:#fff;border-radius:22px;max-width:920px;width:100%;max-height:92vh;overflow:auto;padding:0}
+.modal-pad{padding:24px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.detail-left{background:#f2efe7;min-height:360px;display:grid;place-items:center;font-size:120px;position:relative}
+.detail-right{padding:26px}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.kv div{background:#f7f6f2;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px}
+.kv strong{display:block;font-size:13px}
+.review{border-top:1px solid var(--line);padding:12px 0;font-size:14px}
+.stars{color:#e8a100;letter-spacing:2px}
+.toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:10px;z-index:200}
+.toast{background:var(--ink);color:#fff;padding:13px 16px;border-radius:14px;box-shadow:var(--shadow);font-size:14px;max-width:340px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid .full{grid-column:1/-1}
+label{font-size:13px;font-weight:700;display:block;margin-bottom:6px}
+.empty{padding:34px;text-align:center;color:var(--muted)}
+.footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--muted);font-size:13px;margin-top:20px}
+.badge-verified{font-size:11px;background:var(--green-soft);color:var(--brand-2);padding:3px 8px;border-radius:999px;font-weight:800}
+@media(max-width:1020px){.grid{grid-template-columns:repeat(3,1fr)}.hero{grid-template-columns:1fr}}
+@media(max-width:720px){.grid{grid-template-columns:repeat(2,1fr)}.nav{display:none}.detail-grid{grid-template-columns:1fr}.hero-main h1{font-size:34px}.form-grid{grid-template-columns:1fr}.toolbar{top:60px}}
+@media(max-width:480px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo"><div class="logo-mark">🛠</div><div>ToolLedger<small>P2P lending library</small></div></div>
+    <nav class="nav">
+      <button class="active" data-nav="browse">Browse tools</button>
+      <button data-nav="hub">My Hub <span id="hubCount" class="pill pill-orange" style="margin-left:4px">0</span></button>
+      <button data-nav="how">How it works</button>
+    </nav>
+    <div class="search-wrap">
+      <div class="search"><span>🔍</span><input id="q" placeholder="Search drills, ladders, pressure washers…" /></div>
+      <div class="user-chip" id="userSwitch" title="Switch user (demo auth)"><div class="avatar" id="meAvatar" style="background:#1a7a4c">A</div><div><div id="meName" style="font-weight:800;font-size:13px">Alex</div><div style="font-size:11px;color:var(--muted)">Switch user ▾</div></div></div>
+      <button class="btn btn-primary btn-sm" id="lendBtn">+ Lend a tool</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <!-- HERO -->
+  <section id="view-browse">
+    <div class="hero">
+      <div class="hero-main">
+        <span class="pill pill-green">● 248 neighbors sharing within 5 mi</span>
+        <h1>Borrow tools.<br/>Lend tools.<br/>Build more.</h1>
+        <p>Why buy a tile saw for one weekend? ToolLedger is your neighborhood peer-to-peer library — verified neighbors, deposits protected, ratings you can trust.</p>
+        <div class="hero-stats">
+          <div><strong id="statTools">0</strong><span>Tools listed</span></div>
+          <div><strong>$18,400</strong><span>Saved vs buying</span></div>
+          <div><strong>4.8★</strong><span>Avg rating</span></div>
+          <div><strong>62%</strong><span>Less waste</span></div>
+        </div>
+        <div class="hero-cta">
+          <button class="btn btn-accent" onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})">Find a tool near you →</button>
+          <button class="btn btn-ghost" style="background:transparent;color:#fff;border-color:#3a4440" id="howBtn2">How borrowing works</button>
+        </div>
+      </div>
+      <div class="hero-side">
+        <div class="impact-card">
+          <span class="pill pill-orange">♻ Community impact</span>
+          <h3 style="margin:8px 0">One drill can serve 30 households.</h3>
+          <p style="margin:0;color:var(--muted);font-size:14px">Every borrow keeps ~2.4 kg of tools in circulation. Lenders earn on idle gear — top lenders make <b style="color:var(--ink)">$120/mo</b>.</p>
+        </div>
+        <div class="how-card">
+          <b>How it works</b>
+          <ol>
+            <li><b>Search & request</b> — pick dates, send request with deposit hold.</li>
+            <li><b>Meet & verify</b> — QR handover code + photo check.</li>
+            <li><b>Return & rate</b> — deposit released, both sides reviewed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar" id="catalog">
+      <div class="toolbar-inner">
+        <div class="chips" id="catChips"></div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select id="availFilter"><option value="all">All availability</option><option value="available">Available now</option><option value="free">Free to borrow</option><option value="top">Top rated 4.7+</option></select>
+          <select id="sort"><option value="near">Sort: Nearest</option><option value="cheap">Price: low → high</option><option value="rated">Highest rated</option><option value="popular">Most borrowed</option></select>
+          <label style="display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px"><input type="checkbox" id="favOnly" style="width:auto" /> ♥ Saved</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head"><div><h2 id="resultTitle">Tools near you</h2><p id="resultSub">Verified neighbors • deposits protected • free cancellations 24h before</p></div><button class="btn btn-ghost btn-sm" id="resetBtn">Reset filters</button></div>
+    <div class="grid" id="toolGrid"></div>
+
+    <div class="panel" id="howPanel" style="margin-bottom:36px">
+      <h3 style="margin:0 0 8px">Trust & safety built in</h3>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px" id="trustGrid">
+        <div><b>✔ ID-verified neighbors</b><br/><span style="color:var(--muted);font-size:13px">Government ID + phone check for lenders & borrowers.</span></div>
+        <div><b>💰 Deposit holds</b><br/><span style="color:var(--muted);font-size:13px">Refundable deposit held, auto-released on return.</span></div>
+        <div><b>📸 Handover photos</b><br/><span style="color:var(--muted);font-size:13px">Condition photos at pickup & return prevent disputes.</span></div>
+        <div><b>🛡 Damage cover up to $1k</b><br/><span style="color:var(--muted);font-size:13px">Community guarantee on eligible tools.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HUB -->
+  <section id="view-hub" class="hub">
+    <div class="section-head"><div><h2>My Hub</h2><p>Borrow requests, your listings, earnings & favorites — all in one place.</p></div><button class="btn btn-primary btn-sm" id="lendBtn2">+ List a tool</button></div>
+    <div class="tabs">
+      <button class="active" data-tab="borrows">My borrows (<span id="cB">0</span>)</button>
+      <button data-tab="listings">My listings (<span id="cL">0</span>)</button>
+      <button data-tab="incoming">Incoming requests (<span id="cI">0</span>)</button>
+      <button data-tab="saved">Saved ♥ (<span id="cS">0</span>)</button>
+    </div>
+    <div class="panel"><div id="hubContent"></div></div>
+    <div class="panel" style="margin-top:14px;display:flex;gap:16px;flex-wrap:wrap">
+      <div><small style="color:var(--muted)">EST. EARNINGS THIS MONTH</small><div id="earnings" style="font-size:26px;font-weight:800">$0</div></div>
+      <div><small style="color:var(--muted)">BORROWED vs BOUGHT SAVED</small><div id="savedAmt" style="font-size:26px;font-weight:800">$0</div></div>
+      <div><small style="color:var(--muted)">AVG RATING AS LENDER</small><div style="font-size:26px;font-weight:800">4.9★</div></div>
+    </div>
+  </section>
+
+  <footer class="footer">ToolLedger demo • Single-file HTML app • Data persists in <code>localStorage</code>. <a href="#" id="resetData">Reset demo data</a> • Built for neighborhoods that share. 🛠</footer>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-back" id="detailBack"><div class="modal"><div id="detailContent"></div></div></div>
+<!-- LEND MODAL -->
+<div class="modal-back" id="lendBack"><div class="modal" style="max-width:640px"><div class="modal-pad">
+  <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Lend a tool</h2><button class="btn btn-ghost btn-sm" data-close="lendBack">✕</button></div>
+  <p style="color:var(--muted)">List in under a minute. You approve every request.</p>
+  <div class="form-grid">
+    <div class="full"><label>Tool name</label><input id="fName" placeholder="e.g. DeWalt 20V Cordless Drill" /></div>
+    <div><label>Category</label><select id="fCat" style="width:100%"></select></div>
+    <div><label>Condition</label><select id="fCond" style="width:100%"><option>Like new</option><option>Excellent</option><option>Good</option><option>Fair</option></select></div>
+    <div><label>Fee per day ($) — 0 = free</label><input id="fFee" type="number" min="0" value="8" /></div>
+    <div><label>Deposit ($)</label><input id="fDep" type="number" min="0" value="40" /></div>
+    <div class="full"><label>Description</label><textarea id="fDesc" rows="3" placeholder="What's included, power, size, pickup notes…"></textarea></div>
+    <div class="full"><label>Icon (pick one)</label><div id="iconPick" style="display:flex;gap:8px;flex-wrap:wrap"></div></div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:16px"><button class="btn btn-primary" id="publishBtn">Publish listing</button><button class="btn btn-ghost" data-close="lendBack">Cancel</button></div>
+</div></div></div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+const CATS = ["All","Power Tools","Garden","Cleaning","Painting","Automotive","Party & Events","Kitchen"];
+const ICONS = ["🪛","🔨","🪚","🧹","🧰","🚿","🪜","🔌","🌿","🎨","🚗","⛺","🍳","📷"];
+const USERS = [
+  {id:"u1",name:"Alex",color:"#1a7a4c",loc:"Maple St"},
+  {id:"u2",name:"Priya",color:"#7c3aed",loc:"Oak Ave"},
+  {id:"u3",name:"Sam",color:"#d97706",loc:"River Rd"},
+];
+const SEED_TOOLS = [
+  {name:"DeWalt 20V Max Drill + 2 Batteries",cat:"Power Tools",icon:"🪛",fee:6,dep:40,dist:.4,rating:4.9,borrows:42,cond:"Excellent",owner:"Marcus T.",oInit:"M",oColor:"#0ea5e9",loc:"0.4 mi • Maple St",resp:"~1h",desc:"Brushless drill/driver with 2x 5Ah batteries, charger + 70pc bit set. Perfect for drywall, furniture, decks.",feats:["2 batteries","Bit set incl.","Case"]},
+  {name:"Kärcher K5 Pressure Washer",cat:"Cleaning",icon:"🚿",fee:12,dep:80,dist:.7,rating:4.8,borrows:31,cond:"Like new",owner:"Priya S.",oInit:"P",oColor:"#7c3aed",loc:"0.7 mi • Oak Ave",resp:"~2h",desc:"2100 PSI electric washer with patio + car nozzles, 25ft hose. Blasts driveways and siding clean.",feats:["2100 PSI","2 nozzles","Ext. hose"]},
+  {name:"8ft Fiberglass Step Ladder",cat:"Power Tools",icon:"🪜",fee:0,dep:20,dist:.3,rating:4.9,borrows:58,cond:"Good",owner:"Alex",oInit:"A",oColor:"#1a7a4c",loc:"0.3 mi • You",resp:"~30m",desc:"Free to borrow! Sturdy Werner 8ft ladder, 300lb rated. Great for painting and gutters.",feats:["300 lb rated","Free","Lightweight"]},
+  {name:"Bosch Table Saw + Stand",cat:"Power Tools",icon:"🪚",fee:15,dep:120,dist:1.2,rating:4.7,borrows:19,cond:"Excellent",owner:"Dan K.",oInit:"D",oColor:"#dc2626",loc:"1.2 mi • Hilltop",resp:"~3h",desc:"10in 15A saw with folding gravity stand, rip fence + miter gauge. Rips plywood like butter.",feats:["10 inch","Stand incl.","Blades"]},
+  {name:"Honda Izy Lawn Mower",cat:"Garden",icon:"🌿",fee:10,dep:60,dist:.9,rating:4.8,borrows:36,cond:"Good",owner:"Sam O.",oInit:"S",oColor:"#d97706",loc:"0.9 mi • River Rd",resp:"~1h",desc:"Self-propelled petrol mower, mulching + bagging. Serviced spring 2026, full tank on pickup.",feats:["Self-propelled","Mulcher","Full tank"]},
+  {name:"Wagner Paint Sprayer + Ladder",cat:"Painting",icon:"🎨",fee:9,dep:50,dist:1.5,rating:4.6,borrows:22,cond:"Good",owner:"Lena M.",oInit:"L",oColor:"#db2777",loc:"1.5 mi • Elm Ct",resp:"~4h",desc:"HVLP sprayer for walls/fences + drop cloths, masking kit. Cuts painting time in half.",feats:["HVLP","Drop cloths","Masking kit"]},
+  {name:"Wet/Dry Shop Vac 12gal",cat:"Cleaning",icon:"🧹",fee:5,dep:30,dist:.5,rating:4.7,borrows:47,cond:"Excellent",owner:"Alex",oInit:"A",oColor:"#1a7a4c",loc:"0.5 mi • You",resp:"~45m",desc:"Powerful 5HP vac for garage, car, post-reno cleanup. Crevice + floor heads included.",feats:["12 gal","Car kit","HEPA"]},
+  {name:"OBD2 Car Scanner + Jack Stands",cat:"Automotive",icon:"🚗",fee:4,dep:35,dist:2.1,rating:4.8,borrows:27,cond:"Like new",owner:"Jordan P.",oInit:"J",oColor:"#475569",loc:"2.1 mi • Depot St",resp:"~2h",desc:"Bluetooth OBD2 reader + 3-ton jack stands + torque wrench. Diagnose check-engine in minutes.",feats:["Bluetooth","Jack stands","Manual"]},
+  {name:"6-Person Tent + 4 Chairs + Cooler",cat:"Party & Events",icon:"⛺",fee:14,dep:70,dist:1.8,rating:4.9,borrows:15,cond:"Like new",owner:"Aisha B.",oInit:"A",oColor:"#059669",loc:"1.8 mi • Parkside",resp:"~1h",desc:"Coleman tent, 4 camp chairs, 45L cooler + string lights. Weekend camping bundle.",feats:["Sleeps 6","Cooler","Lights"]},
+  {name:"KitchenAid Stand Mixer + Attachments",cat:"Kitchen",icon:"🍳",fee:7,dep:45,dist:.6,rating:5.0,borrows:33,cond:"Like new",owner:"Nora F.",oInit:"N",oColor:"#f59e0b",loc:"0.6 mi • Baker Ln",resp:"~1h",desc:"5qt Artisan mixer with pasta + grinder attachments. Holiday baking hero.",feats:["5 qt","3 attachments","Recipe book"]},
+  {name:"Hedge Trimmer 40V + Loppers",cat:"Garden",icon:"✂️",fee:8,dep:40,dist:1.1,rating:4.5,borrows:18,cond:"Good",owner:"Tom H.",oInit:"T",oColor:"#16a34a",loc:"1.1 mi • Grove",resp:"~5h",desc:"Ryobi 24in trimmer + Felco loppers + garden waste bags. Tame any hedge.",feats:["40V","2 batteries","Bags"]},
+  {name:"Projector + 100in Screen + Speaker",cat:"Party & Events",icon:"📽",fee:11,dep:60,dist:.8,rating:4.9,borrows:25,cond:"Excellent",owner:"Chris D.",oInit:"C",oColor:"#4f46e5",loc:"0.8 mi • Lakeview",resp:"~2h",desc:"1080p mini projector, tripod screen + JBL speaker. Backyard movie nights.",feats:["1080p","HDMI","Speaker"]},
+];
+const SEED_REVIEWS = [
+  {who:"Jamie L.",stars:5,text:"Exactly as described, owner even threw in extra bits. Pickup took 2 minutes."},
+  {who:"Rosa G.",stars:5,text:"Super clean and well maintained. Deposit released instantly on return."},
+  {who:"Ken A.",stars:4,text:"Great tool, slight delay on pickup but great communication."},
+];
+
+let store = load() || seed();
+let me = localStorage.getItem("tl_me") || "u1";
+let activeCat="All", favOnly=false, currentTool=null, hubTab="borrows", pickedIcon="🧰";
+
+function seed(){
+  const tools = SEED_TOOLS.map((t,i)=>({id:"t"+(i+1),...t,available:true,free:t.fee===0,mine:t.owner==="Alex",created:Date.now()-i*864e5,reviews:SEED_REVIEWS}));
+  const s={tools,reqs:[
+    {id:"r1",toolId:"t2",by:"u1",byName:"Alex",from:"2026-10-16",to:"2026-10-18",days:2,total:24,status:"approved",code:"TL-4821",msg:"Driveway + patio clean this weekend!"},
+    {id:"r2",toolId:"t1",by:"u3",byName:"Sam",from:"2026-10-14",to:"2026-10-15",days:1,total:6,status:"pending",code:"TL-9910",msg:"Need to mount shelves."},
+  ],favs:["t10","t12"]};
+  save(s); return s;
+}
+function load(){ try{return JSON.parse(localStorage.getItem("tl_v1"))}catch(e){return null} }
+function save(s){ store=s||store; localStorage.setItem("tl_v1",JSON.stringify(store)); }
+function myUser(){ return USERS.find(u=>u.id===me) }
+function toast(m){ const d=document.createElement("div");d.className="toast";d.textContent=m;document.getElementById("toasts").appendChild(d);setTimeout(()=>d.remove(),3200) }
+
+/* RENDER CATALOG */
+function renderCats(){
+  document.getElementById("catChips").innerHTML = CATS.map(c=>`<button class="chip ${c===activeCat?'active':''}" data-cat="${c}">${c}</button>`).join("");
+  document.querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>{activeCat=b.dataset.cat;renderCats();renderGrid()});
+  document.getElementById("fCat").innerHTML = CATS.slice(1).map(c=>`<option>${c}</option>`).join("");
+}
+function filtered(){
+  const q=document.getElementById("q").value.toLowerCase();
+  const af=document.getElementById("availFilter").value, sort=document.getElementById("sort").value;
+  let list=[...store.tools];
+  if(activeCat!=="All") list=list.filter(t=>t.cat===activeCat);
+  if(q) list=list.filter(t=>(t.name+t.desc+t.owner+t.cat).toLowerCase().includes(q));
+  if(af==="available") list=list.filter(t=>t.available);
+  if(af==="free") list=list.filter(t=>t.fee===0);
+  if(af==="top") list=list.filter(t=>t.rating>=4.7);
+  if(favOnly) list=list.filter(t=>store.favs.includes(t.id));
+  if(sort==="cheap") list.sort((a,b)=>a.fee-b.fee);
+  else if(sort==="rated") list.sort((a,b)=>b.rating-a.rating);
+  else if(sort==="popular") list.sort((a,b)=>b.borrows-a.borrows);
+  else list.sort((a,b)=>a.dist-b.dist);
+  return list;
+}
+const grad = id => `background:linear-gradient(135deg, hsl(${(parseInt(id.slice(1))*47)%360} 45% 92%, #fff)`;
+function renderGrid(){
+  const list=filtered();
+  document.getElementById("statTools").textContent=store.tools.length*21+"+";
+  document.getElementById("resultTitle").textContent=`${list.length} tool${list.length!==1?"s":""} ${activeCat==="All"?"near you":"in "+activeCat}`;
+  document.getElementById("toolGrid").innerHTML = list.length? list.map(t=>`
+    <div class="card" data-open="${t.id}">
+      <div class="card-img" style="${grad(t.id)}">${t.icon}
+        <div class="fav" data-fav="${t.id}">${store.favs.includes(t.id)?"♥":"♡"}</div>
+        <span style="position:absolute;bottom:10px;left:10px" class="pill ${t.available?'pill-green':'pill-gray'}"><span class="avail-dot" style="background:${t.available?'#1a7a4c':'#999'}"></span>${t.available?'Available':'On loan'}</span>
+        ${t.fee===0?'<span style="position:absolute;bottom:10px;right:10px" class="pill pill-orange">FREE</span>':''}
+      </div>
+      <div class="card-body">
+        <p class="card-title">${t.name}</p>
+        <div class="card-meta">⭐ ${t.rating} (${t.borrows}) • 📍 ${t.loc} • <span class="badge-verified">✔ ${t.owner}</span></div>
+        <div class="card-foot"><div class="price">${t.fee===0?"Free":"$"+t.fee}<small>/day</small> <small style="font-weight:400">+$${t.dep} dep</small></div><button class="btn btn-dark btn-sm" data-open="${t.id}">Borrow</button></div>
+      </div>
+    </div>`).join("") : `<div class="empty panel" style="grid-column:1/-1">No tools match. Try clearing filters or <b>lend your own</b>! <br/><br/><button class="btn btn-primary btn-sm" onclick="openLend()">+ List a tool</button></div>`;
+  document.querySelectorAll("[data-open]").forEach(el=>el.onclick=e=>{e.stopPropagation();openDetail(el.dataset.open)});
+  document.querySelectorAll("[data-fav]").forEach(el=>el.onclick=e=>{e.stopPropagation();toggleFav(el.dataset.fav)});
+  renderHubCount();
+}
+function toggleFav(id){
+  const i=store.favs.indexOf(id);
+  if(i>=0) store.favs.splice(i,1); else store.favs.push(id);
+  save(); renderGrid(); renderHub(); toast(i>=0?"Removed from saved":"Saved to favorites ♥");
+}
+
+/* DETAIL */
+function openDetail(id){
+  currentTool=store.tools.find(t=>t.id===id); const t=currentTool;
+  const gradBg=`background:linear-gradient(135deg, hsl(${(parseInt(t.id.slice(1))*47)%360} 55% 88%, #f7f6f2)`;
+  document.getElementById("detailContent").innerHTML=`
+  <div class="detail-grid">
+    <div class="detail-left" style="${gradBg}"><span>${t.icon}</span>
+      <span style="position:absolute;top:14px;left:14px" class="pill ${t.available?'pill-green':'pill-gray'}">${t.available?'● Available now':'● Currently on loan'}</span>
+    </div>
+    <div class="detail-right">
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:10px"><div><div style="font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.06em">${t.cat.toUpperCase()} • ${t.cond.toUpperCase()}</div><h2 style="margin:4px 0">${t.name}</h2></div><button class="btn btn-ghost btn-sm" data-close="detailBack">✕</button></div>
+      <div style="font-size:14px">⭐ <b>${t.rating}</b> (${t.borrows} borrows) • 📍 ${t.loc} • ⚡ responds ${t.resp}</div>
+      <p style="color:#3a4140">${t.desc}</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${t.feats.map(f=>`<span class="pill pill-gray">${f}</span>`).join("")}</div>
+      <div class="kv"><div><strong>$${t.fee}/day ${t.fee===0?"(FREE)":""}</strong>Rental fee</div><div><strong>$${t.dep} refundable</strong>Deposit hold</div><div><strong>${t.owner}</strong>Owner • <span class="badge-verified">✔ Verified</span></div><div><strong>Handover</strong>QR code + photo check</div></div>
+      <div style="background:#f7f6f2;border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div><label>Pickup</label><input type="date" id="dFrom" value="2026-10-16" /></div>
+        <div><label>Return</label><input type="date" id="dTo" value="2026-10-18" /></div>
+        <div><label>Total</label><div id="dTotal" style="font-weight:800;font-size:20px;padding-top:22px">$0</div></div>
+        <div style="grid-column:1/-1"><label>Message to ${t.owner} (optional)</label><input type="text" id="dMsg" placeholder="What project is it for?" /></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" id="reqBtn" ${!t.available?"disabled style='opacity:.5'":""}>${!t.available?"On loan — notify me":"Request to borrow →"}</button>
+        <button class="btn btn-ghost" id="favBtn2">${store.favs.includes(t.id)?"♥ Saved":"♡ Save"}</button>
+      </div>
+      <h4 style="margin:20px 0 6px">Recent reviews</h4>
+      <div id="revList">${t.reviews.map(r=>`<div class="review"><div class="stars">${"★".repeat(r.stars)}${"☆".repeat(5-r.stars)}</div><b>${r.who}</b> — ${r.text}</div>`).join("")}</div>
+      <div style="display:flex;gap:8px;margin-top:8px"><input type="text" id="revText" placeholder="Leave a quick review…" /><button class="btn btn-dark btn-sm" id="revBtn">Post</button></div>
+    </div>
+  </div>`;
+  document.getElementById("detailBack").classList.add("open");
+  document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.close).classList.remove("open"));
+  const calc=()=>{ const a=new Date(document.getElementById("dFrom").value), b=new Date(document.getElementById("dTo").value); let d=Math.round((b-a)/864e5)||1; if(d<1)d=1; document.getElementById("dTotal").textContent="$"+(d*t.fee)+` (${d}d)`; return d; };
+  document.getElementById("dFrom").onchange=calc; document.getElementById("dTo").onchange=calc; calc();
+  document.getElementById("reqBtn").onclick=()=>{
+    if(!t.available){toast("We'll notify you when it's back! 🔔");return}
+    const from=document.getElementById("dFrom").value, to=document.getElementById("dTo").value, days=calc(), msg=document.getElementById("dMsg").value;
+    const u=myUser();
+    store.reqs.unshift({id:"r"+Date.now(),toolId:t.id,by:me,byName:u.name,from,to,days,total:days*t.fee,status:"pending",code:"TL-"+Math.floor(1000+Math.random()*9000),msg});
+    save(); document.getElementById("detailBack").classList.remove("open"); renderHub(); toast(`Request sent to ${t.owner}! Code ${store.reqs[0].code} 📩`);
+  };
+  document.getElementById("favBtn2").onclick=()=>{toggleFav(t.id);document.getElementById("detailBack").classList.remove("open")};
+  document.getElementById("revBtn").onclick=()=>{ const v=document.getElementById("revText").value.trim(); if(!v)return; t.reviews.unshift({who:myUser().name,stars:5,text:v}); save(); openDetail(t.id); toast("Thanks for reviewing! ⭐") };
+}
+
+/* LEND */
+function openLend(){
+  document.getElementById("iconPick").innerHTML=ICONS.map(i=>`<button class="chip ${i===pickedIcon?'active':''}" data-ic="${i}" style="font-size:20px">${i}</button>`).join("");
+  document.querySelectorAll("[data-ic]").forEach(b=>b.onclick=e=>{e.preventDefault();pickedIcon=b.dataset.ic;openLend()});
+  document.getElementById("lendBack").classList.add("open");
+}
+document.getElementById("lendBtn").onclick=openLend;
+document.getElementById("lendBtn2").onclick=openLend;
+document.getElementById("publishBtn").onclick=()=>{
+  const name=document.getElementById("fName").value.trim();
+  if(!name){toast("Give your tool a name first");return}
+  const u=myUser();
+  store.tools.unshift({id:"t"+Date.now(),name,cat:document.getElementById("fCat").value,icon:pickedIcon,fee:+document.getElementById("fFee").value||0,dep:+document.getElementById("fDep").value||0,dist:.2,rating:5.0,borrows:0,cond:document.getElementById("fCond").value,owner:u.name,oInit:u.name[0],oColor:u.color,loc:"0.2 mi • "+u.loc,resp:"~1h",desc:document.getElementById("fDesc").value||"Well-maintained tool, pickup flexible. Message me with dates!",feats:["Verified","Photo check"],available:true,free:+document.getElementById("fFee").value===0,mine:true,created:Date.now(),reviews:[]});
+  save(); document.getElementById("lendBack").classList.remove("open"); renderGrid(); renderHub(); toast("🎉 Listed! Neighbors can now request it.");
+  document.getElementById("fName").value="";document.getElementById("fDesc").value="";
+};
+window.openLend=openLend;
+
+/* HUB */
+function renderHubCount(){
+  const mine=store.reqs.filter(r=>r.by===me).length + store.reqs.filter(r=>{const t=store.tools.find(x=>x.id===r.toolId);return t&&t.owner===myUser().name}).length;
+  document.getElementById("hubCount").textContent=mine;
+}
+function renderHub(){
+  renderHubCount();
+  const u=myUser();
+  const myBorrows=store.reqs.filter(r=>r.by===me);
+  const myListings=store.tools.filter(t=>t.owner===u.name);
+  const incoming=store.reqs.filter(r=>{const t=store.tools.find(x=>x.id===r.toolId);return t&&t.owner===u.name});
+  document.getElementById("cB").textContent=myBorrows.length;
+  document.getElementById("cL").textContent=myListings.length;
+  document.getElementById("cI").textContent=incoming.length;
+  document.getElementById("cS").textContent=store.favs.length;
+  document.getElementById("earnings").textContent="$"+incoming.filter(r=>r.status!=="declined").reduce((s,r)=>s+r.total,0);
+  document.getElementById("savedAmt").textContent="$"+(myBorrows.length*68);
+  const el=document.getElementById("hubContent");
+  const row=r=>{const t=store.tools.find(x=>x.id===r.toolId)||{name:"(removed)",icon:"📦",fee:0};
+    return `<tr><td>${t.icon} <b>${t.name}</b><br/><small style="color:var(--muted)">${r.from} → ${r.to} • ${r.days}d • $${r.total} • Code ${r.code}${r.msg?` • “${r.msg}”`:""}</small></td><td>${hubTab==="borrows"?t.owner||"":r.byName}</td><td><span class="status s-${r.status}">${r.status.toUpperCase()}</span></td><td style="white-space:nowrap">${hubTab==="incoming"&&r.status==="pending"?`<button class="btn btn-primary btn-sm" data-act="approve:${r.id}">Approve</button> <button class="btn btn-ghost btn-sm" data-act="decline:${r.id}">Decline</button>`:hubTab==="borrows"&&r.status==="approved"?`<button class="btn btn-dark btn-sm" data-act="return:${r.id}">Mark returned</button>`:""} ${r.status==="pending"&&hubTab==="borrows"?`<button class="btn btn-ghost btn-sm" data-act="cancel:${r.id}">Cancel</button>`:""}</td></tr>`};
+  if(hubTab==="borrows") el.innerHTML=myBorrows.length?`<table class="table"><tr><th>Tool / dates</th><th>Owner</th><th>Status</th><th></th></tr>${myBorrows.map(row).join("")}</table>`:`<div class="empty">Nothing borrowed yet. <a href="#" onclick="goBrowse();return false">Browse tools →</a></div>`;
+  else if(hubTab==="incoming") el.innerHTML=incoming.length?`<table class="table"><tr><th>Tool / dates</th><th>Borrower</th><th>Status</th><th></th></tr>${incoming.map(row).join("")}</table>`:`<div class="empty">No incoming requests. Share a listing to start earning!</div>`;
+  else if(hubTab==="listings") el.innerHTML=myListings.length?`<table class="table"><tr><th>Listing</th><th>Fee</th><th>Rating</th><th></th></tr>${myListings.map(t=>`<tr><td>${t.icon} <b>${t.name}</b><br/><small style="color:var(--muted)">${t.cat} • ${t.borrows} borrows</small></td><td>$${t.fee}/d</td><td>⭐ ${t.rating}</td><td><button class="btn btn-ghost btn-sm" data-act="toggle:${t.id}">${t.available?"Pause":"Unpause"}</button> <button class="btn btn-ghost btn-sm" data-act="del:${t.id}">Remove</button></td></tr>`).join("")}</table>`:`<div class="empty">You haven't listed anything yet.</div>`;
+  else el.innerHTML=store.favs.length?`<div class="grid" style="grid-template-columns:repeat(3,1fr)">${store.favs.map(id=>{const t=store.tools.find(x=>x.id===id);return t?`<div class="card" data-open="${t.id}"><div class="card-img" style="${grad(t.id)}">${t.icon}</div><div class="card-body"><p class="card-title">${t.name}</p><div class="card-foot"><div class="price">${t.fee===0?"Free":"$"+t.fee}<small>/day</small></div><button class="btn btn-dark btn-sm" data-open="${t.id}">View</button></div></div></div>`:""}).join("")}</div>`:`<div class="empty">Tap ♡ on any tool to save it here.</div>`;
+  el.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDetail(b.dataset.open));
+  el.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>{
+    const [act,id]=b.dataset.act.split(":");
+    if(act==="approve"||act==="decline"){const r=store.reqs.find(x=>x.id===id);r.status=act==="approve"?"approved":"declined";if(act==="approve"){const t=store.tools.find(x=>x.id===r.toolId);if(t)t.available=false}toast(act==="approve"?"Approved! Borrower got the QR code ✅":"Declined.")}
+    if(act==="cancel"||act==="return"){ if(act==="return"){const r=store.reqs.find(x=>x.id===id);r.status="returned";const t=store.tools.find(x=>x.id===r.toolId);if(t){t.available=true;t.borrows++}toast("Marked returned. Deposit released 💸")} else {store.reqs=store.reqs.filter(x=>x.id!==id);toast("Request cancelled")} }
+    if(act==="toggle"){const t=store.tools.find(x=>x.id===id);t.available=!t.available;toast(t.available?"Listing live":"Listing paused")}
+    if(act==="del"){store.tools=store.tools.filter(x=>x.id!==id);toast("Listing removed")}
+    save();renderGrid();renderHub();
+  });
+}
+
+/* NAV / EVENTS */
+function goBrowse(){document.getElementById("view-browse").style.display="";document.getElementById("view-hub").classList.remove("active");document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.nav==="browse"))}
+window.goBrowse=goBrowse;
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+  const v=b.dataset.nav;
+  if(v==="browse"){goBrowse()}
+  else if(v==="hub"){document.getElementById("view-browse").style.display="none";document.getElementById("view-hub").classList.add("active");renderHub()}
+  else{document.getElementById("howPanel").scrollIntoView({behavior:"smooth"});goBrowse()}
+});
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");hubTab=b.dataset.tab;renderHub()});
+document.getElementById("howBtn2").onclick=()=>document.getElementById("howPanel").scrollIntoView({behavior:"smooth"});
+["q","availFilter","sort"].forEach(id=>document.getElementById(id).oninput=renderGrid);
+document.getElementById("favOnly").onchange=e=>{favOnly=e.target.checked;renderGrid()};
+document.getElementById("resetBtn").onclick=()=>{activeCat="All";favOnly=false;document.getElementById("favOnly").checked=false;document.getElementById("q").value="";document.getElementById("availFilter").value="all";renderCats();renderGrid()};
+document.getElementById("resetData").onclick=e=>{e.preventDefault();localStorage.removeItem("tl_v1");store=seed();renderCats();renderGrid();renderHub();toast("Demo data reset")};
+document.getElementById("detailBack").addEventListener("click",e=>{if(e.target.id==="detailBack")e.target.classList.remove("open")});
+document.getElementById("lendBack").addEventListener("click",e=>{if(e.target.id==="lendBack")e.target.classList.remove("open")});
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.close).classList.remove("open"));
+document.getElementById("userSwitch").onclick=()=>{
+  const i=USERS.findIndex(u=>u.id===me); me=USERS[(i+1)%USERS.length].id; localStorage.setItem("tl_me",me); paintMe(); renderHub(); renderGrid(); toast("Signed in as "+myUser().name+" ("+myUser().loc+")");
+};
+function paintMe(){const u=myUser();document.getElementById("meName").textContent=u.name;document.getElementById("meAvatar").textContent=u.name[0];document.getElementById("meAvatar").style.background=u.color}
+
+/* INIT */
+paintMe(); renderCats(); renderGrid(); renderHub();
+</script>
+</body>
+</html>
